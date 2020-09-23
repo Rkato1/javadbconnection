@@ -1,0 +1,68 @@
+package member.controller;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+import member.model.dao.MemberDao;
+import member.model.vo.Member;
+
+public class MemberController {
+	Scanner sc;
+	MemberDao dao;
+	public MemberController() {
+		super();
+		sc = new Scanner(System.in);
+		dao = new MemberDao();
+	}
+	
+	public void main() {
+		while(true) {
+			System.out.println("=== 회원 관리 프로그램 ===");
+			System.out.println("1. 전체회원 정보 출력");
+			System.out.println("2. 회원 정보 출력(1명)");
+			System.out.println("3. 회원 등록");
+			System.out.println("4. 회원 정보 수정");
+			System.out.println("5. 회원 정보 삭제");
+			System.out.print("선택 > ");
+			int sel = sc.nextInt();
+			
+			switch(sel) {
+			case 1:
+				selectAllMember();
+				break;
+			case 2:
+				selectMember();
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 5:
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	public void selectAllMember() {
+		// TODO Auto-generated method stub
+		ArrayList<Member> list = dao.selectAllMember();
+		//같은 뜻
+		//if(list.size()==0) {
+		if(list.isEmpty()) {
+			System.out.println("회원이 아직 없음");
+		}else {
+			System.out.println("=== 전체 회원 정보 ===");
+			System.out.println("번호\t아이디\t비밀번호\t이름\t나이\t성별\t번호\t\t날짜");
+			for(Member m : list) {
+				System.out.println(m.getMemberNo()+"\t"+m.getMemberId()+"\t"+m.getMemberPw()+"\t"+m.getMemberName()+"\t"+m.getAge()+"\t"+m.getGender()+"\t"+m.getPhone()+"\t"+m.getEnroolDate());
+			}
+		}
+	}
+	
+	public void selectMember() {
+		// TODO Auto-generated method stub
+		
+	}
+}

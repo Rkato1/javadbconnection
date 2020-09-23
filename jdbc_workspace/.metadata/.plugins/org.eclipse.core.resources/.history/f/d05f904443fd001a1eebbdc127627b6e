@@ -1,0 +1,14 @@
+package member.model.vo;
+
+import java.sql.Date;
+
+public class Member {
+	int memberNo;
+	String memberId;
+	String memberPw;
+	String memberName;
+	int age;
+	char gender;
+	String phone;
+	Date date;
+}

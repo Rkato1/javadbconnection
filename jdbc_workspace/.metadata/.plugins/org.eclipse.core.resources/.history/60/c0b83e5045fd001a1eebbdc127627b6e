@@ -1,0 +1,10 @@
+package member.controller;
+
+import java.util.Scanner;
+
+import member.model.dao.MemberDao;
+
+public class MemberController {
+	Scanner sc;
+	MemberDao dao;
+}

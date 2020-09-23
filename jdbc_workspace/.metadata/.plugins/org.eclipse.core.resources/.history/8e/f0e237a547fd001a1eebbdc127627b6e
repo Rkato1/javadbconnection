@@ -1,0 +1,40 @@
+package member.model.dao;
+
+import java.beans.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import member.model.vo.Member;
+
+public class MemberDao {
+
+	public void selectAllMember() {
+		// TODO Auto-generated method stub
+		ArrayList<Member> list = new ArrayList<Member>();
+		//;넣지 말기
+		String query = "select * from member";
+		//dbms연결용 객체
+		Connection conn = null;
+		//sql구문을 사용하기 위한 객체
+		Statement stmt = null;
+		//sql결과를 받기위한 객체
+		ResultSet rset = null;		
+		
+		try {
+			//1.driver등록(사용할 db에 대한 드라이버 설정)
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			//2.driver를 이용해서 db연결(connection객체 생성)
+			conn = DriverManager.getConnection("","","");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}
