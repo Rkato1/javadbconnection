@@ -1,17 +1,27 @@
-package member.model.dao;
+package dao;
 
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import member.model.vo.Member;
+import vo.Member;
 
+//statement/preparedstatement
+//캐시메모리 사용
+//ps -> 객체 생성시 sql문법검사완료(파싱)
+//문법에 문제가 없는 경우 캐시메모리에 sql query 저장
+//같은 query를 다시 수행하는 경우 캐시에 있는 데이터를 이용하여
+//바로 수행하기 때문에 속도가 빠름
+//보안성
+//ps -> 인자값이 없는 상태로 문법검사를 완료하고 인자를 대입하기때문에 
+//sql query의 노출이 없고 보안성이 더 높다.
+//'or'1'='1 치면 다 뚫림
 public class MemberDao {
-
 	public ArrayList selectAllMember() {
 		// TODO Auto-generated method stub
 		ArrayList<Member> list = new ArrayList<Member>();
@@ -20,7 +30,7 @@ public class MemberDao {
 		//dbms연결용 객체
 		Connection conn = null;
 		//sql구문을 사용하기 위한 객체
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		//sql결과를 받기위한 객체(select인지 아닌지 고려)
 		ResultSet rset = null;		
 		
@@ -33,9 +43,9 @@ public class MemberDao {
 			//접속실패시 null,성공시 객체생성
 			//System.out.println("conn : "+conn);
 			//3.쿼리문을 실행할 객체 생성(statement객체 생성)
-			stmt = conn.createStatement();
+			pstmt = conn.prepareStatement(query);
 			//4.쿼리문 전송하고 결과 받기
-			rset = stmt.executeQuery(query);
+			rset = pstmt.executeQuery();
 			//결과처리
 			//끝날때까지 읽기
 			while(rset.next()) {
@@ -62,7 +72,7 @@ public class MemberDao {
 			try {
 				//6.자원반환
 				rset.close();
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -73,30 +83,32 @@ public class MemberDao {
 	}
 
 	public Member selectMember(String str) {
-		Member m = new Member();
-		String query = "select * from member where member_id='"+str+"'";
+		Member m = null;		
 		Connection conn = null;
-		Statement stmt = null;
+		//Statement stmt = null;
 		ResultSet rset = null;
+		PreparedStatement pstmt = null;
+		//쿼리에 위치홀더('?') - 부분에 인자값을 넣어주기 위한 상태
+		String query = "select * from member where member_id=?";
 		
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe","jdbc","1234");
 			//System.out.println("conn : "+conn);
-			stmt = conn.createStatement();
-			rset = stmt.executeQuery(query);
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, str);
+			rset = pstmt.executeQuery();
 			while(rset.next()) {
-				//컬럼이름의 값을 데이터 형식에 맞춰서 받아옴(컬럼의 숫자여도 가능)				
-				int memberNo =	rset.getInt(1);
-				String memberId = rset.getString(2);
-				String memberPw = rset.getString(3);
-				String memberName = rset.getString(4);
-				String phone = rset.getString(5);
-				int age = rset.getInt(6);
-				char gender = rset.getString(7).charAt(0);
-				Date enrollDate = rset.getDate(8);				
-				//5.값넣기
-				m = new Member(memberNo,memberId,memberPw,memberName,age,gender,phone,enrollDate);
+				//컬럼이름의 값을 데이터 형식에 맞춰서 받아옴(컬럼의 숫자여도 가능)
+				m = new Member();
+				m.setMemberNo(rset.getInt(1));
+				m.setMemberId(rset.getString(2));
+				m.setMemberPw(rset.getString(3));
+				m.setMemberName(rset.getString(4));
+				m.setPhone(rset.getString(5));
+				m.setAge(rset.getInt(6));
+				m.setGender(rset.getString(7).charAt(0));
+				m.setEnroolDate(rset.getDate(8));
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -108,7 +120,7 @@ public class MemberDao {
 			try {
 				//6.자원반환
 				rset.close();
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -122,7 +134,7 @@ public class MemberDao {
 		Member m = new Member();
 		String query = "select * from member where member_name like '%"+str+"%'";
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		
 		try {
@@ -131,8 +143,8 @@ public class MemberDao {
 			//타ip접근
 			//conn = DriverManager.getConnection("jdbc:oracle:thin:@192.168.10.23:1521:xe","jdbc","1234");
 			//System.out.println("conn : "+conn);
-			stmt = conn.createStatement();
-			rset = stmt.executeQuery(query);
+			pstmt = conn.prepareStatement(query);
+			rset = pstmt.executeQuery();
 			while(rset.next()) {
 				int memberNo =	rset.getInt(1);
 				String memberId = rset.getString(2);
@@ -155,7 +167,7 @@ public class MemberDao {
 			try {
 				//6.자원반환
 				rset.close();
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -275,5 +287,4 @@ public class MemberDao {
 		}
 		return result;
 	}
-
 }

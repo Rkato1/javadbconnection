@@ -1,10 +1,10 @@
-package member.controller;
+package controller;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import member.model.dao.MemberDao;
-import member.model.vo.Member;
+import dao.MemberDao;
+import vo.Member;
 
 public class MemberController {
 	Scanner sc;
@@ -51,7 +51,7 @@ public class MemberController {
 			}
 		}
 	}
-
+	
 	public void selectAllMember() {
 		// TODO Auto-generated method stub
 		ArrayList<Member> list = dao.selectAllMember();
