@@ -1,10 +1,12 @@
 package controller;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import dao.MemberDao;
-import vo.Member;
+import common.JDBCTemplate;
+import model.dao.MemberDao;
+import model.vo.Member;
 
 public class MemberController {
 	Scanner sc;
@@ -54,9 +56,8 @@ public class MemberController {
 	
 	public void selectAllMember() {
 		// TODO Auto-generated method stub
-		ArrayList<Member> list = dao.selectAllMember();
-		//같은 뜻
-		//if(list.size()==0) {
+		Connection conn = JDBCTemplate.getConnection();
+		ArrayList<Member> list = dao.selectAllMember(conn);
 		if(list.isEmpty()) {
 			System.out.println("회원이 아직 없음");
 		}else {
@@ -66,12 +67,15 @@ public class MemberController {
 				System.out.println(m.getMemberNo()+"\t"+m.getMemberId()+"\t"+m.getMemberPw()+"\t"+m.getMemberName()+"\t"+m.getAge()+"\t"+m.getGender()+"\t"+m.getPhone()+"\t"+m.getEnroolDate());
 			}
 		}
+
+		JDBCTemplate.close(conn);
 	}
 	
 	public void selectMember() {
 		System.out.print("조회할 id 입력 : ");
 		String str = sc.next();
-		Member m = dao.selectMember(str);
+		Connection conn = JDBCTemplate.getConnection();
+		Member m = dao.selectMember(conn, str);
 		if(m.getMemberId() == null) {
 			System.out.println("조회 불가");
 		}else {
@@ -79,13 +83,15 @@ public class MemberController {
 			System.out.println("번호\t아이디\t비밀번호\t이름\t나이\t성별\t번호\t\t날짜");
 			System.out.println(m.getMemberNo()+"\t"+m.getMemberId()+"\t"+m.getMemberPw()+"\t"+m.getMemberName()+"\t"+m.getAge()+"\t"+m.getGender()+"\t"+m.getPhone()+"\t"+m.getEnroolDate());
 		}
+		JDBCTemplate.close(conn);
 	}
 	
 	public void selectMembercontain() {
 		// TODO Auto-generated method stub
 		System.out.print("조회할 이름 입력(검색문자포함) : ");
 		String str = sc.next();
-		ArrayList<Member> list = dao.selectMembercontain(str);
+		Connection conn = JDBCTemplate.getConnection();
+		ArrayList<Member> list = dao.selectMembercontain(conn, str);
 		if(list.isEmpty()) {
 			System.out.println("조회 불가");
 		}else {
@@ -95,6 +101,7 @@ public class MemberController {
 				System.out.println(m.getMemberNo()+"\t"+m.getMemberId()+"\t"+m.getMemberPw()+"\t"+m.getMemberName()+"\t"+m.getAge()+"\t"+m.getGender()+"\t"+m.getPhone()+"\t"+m.getEnroolDate());
 			}
 		}
+		JDBCTemplate.close(conn);
 	}
 
 	public void insertMember() {
@@ -113,26 +120,34 @@ public class MemberController {
 		m.setAge(sc.nextInt());
 		System.out.print("성별 입력 : ");
 		m.setGender(sc.next().charAt(0));
-		int result = dao.insertMember(m);
+		Connection conn = JDBCTemplate.getConnection();
+		int result = dao.insertMember(conn, m);
 		if(result>0) {
+			JDBCTemplate.commit(conn);
 			System.out.println("등록성공");
 		}else {
+			JDBCTemplate.rollback(conn);
 			System.out.println("등록실패");
 		}
 		System.out.println(result+"개 행에 적용됨");
+		JDBCTemplate.close(conn);
 	}
 
 	public void deleteMember() {
-		// TODO Auto-generated method stub
 		System.out.print("삭제할 이름 입력 : ");
 		String str = sc.next();
-		int result = dao.deleteMember(str);
-		if(result>0) {
+		Connection conn = JDBCTemplate.getConnection();
+		int result1 = dao.deleteMember(conn,str);
+		int result2 = dao.insertDelMember(conn,str);
+		if(result1>0 && result2>0) {
+			JDBCTemplate.commit(conn);
 			System.out.println("삭제성공");
-		}else {
+		}else {			
+			JDBCTemplate.rollback(conn);
 			System.out.println("삭제실패");
 		}
-		System.out.println(result+"개 행에 적용됨");
+		JDBCTemplate.close(conn);
+		System.out.println(result1+"개 행에 적용됨");
 	}
 	
 	public void updateMember() {
@@ -140,7 +155,8 @@ public class MemberController {
 		int result = 0;
 		System.out.print("수정할 id 입력 : ");
 		String str = sc.next();
-		Member m = dao.selectMember(str);		
+		Connection conn = JDBCTemplate.getConnection();
+		Member m = dao.selectMember(conn,str);
 		if(m.getMemberId() == null) {
 			System.out.println("조회 불가");
 		}else {
@@ -151,14 +167,16 @@ public class MemberController {
 			m.setGender(sc.next().charAt(0));
 			System.out.print("번호 입력 : ");
 			m.setPhone(sc.next());
-			result = dao.updateMember(m);			
+			result = dao.updateMember(conn,m);			
 		}
 		if(result>0) {
+			JDBCTemplate.commit(conn);
 			System.out.println("수정성공");
 		}else {
+			JDBCTemplate.rollback(conn);
 			System.out.println("수정실패");
 		}
-		System.out.println(result+"개 행에 적용됨");
-		
+		JDBCTemplate.close(conn);
+		System.out.println(result+"개 행에 적용됨");		
 	}
 }

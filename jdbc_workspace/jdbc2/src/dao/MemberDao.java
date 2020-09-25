@@ -35,21 +35,12 @@ public class MemberDao {
 		ResultSet rset = null;		
 		
 		try {
-			//1.driver등록(사용할 db에 대한 드라이버 설정)
+			//안써도 되지만 오류찾기 용이하기 위해 기입
 			Class.forName("oracle.jdbc.driver.OracleDriver");
-			//2.driver를 이용해서 db연결(connection객체 생성)
-			//어떤 db 연결방식 ip주소 port번호, id, 비번
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe","jdbc","1234");
-			//접속실패시 null,성공시 객체생성
-			//System.out.println("conn : "+conn);
-			//3.쿼리문을 실행할 객체 생성(statement객체 생성)
 			pstmt = conn.prepareStatement(query);
-			//4.쿼리문 전송하고 결과 받기
 			rset = pstmt.executeQuery();
-			//결과처리
-			//끝날때까지 읽기
-			while(rset.next()) {
-				//컬럼이름의 값을 데이터 형식에 맞춰서 받아옴(컬럼의 숫자여도 가능)				
+			while(rset.next()) {				
 				int memberNo =	rset.getInt("member_no");
 				String memberId = rset.getString("member_id");
 				String memberPw = rset.getString("member_pw");
@@ -58,7 +49,6 @@ public class MemberDao {
 				char gender = rset.getString("gender").charAt(0);
 				String phone = rset.getString("phone");
 				Date enrollDate = rset.getDate("enroll_date");
-				//5.값넣기
 				Member mem = new Member(memberNo,memberId,memberPw,memberName,age,gender,phone,enrollDate);
 				list.add(mem);
 			}
@@ -70,7 +60,6 @@ public class MemberDao {
 			e.printStackTrace();
 		}finally {			
 			try {
-				//6.자원반환
 				rset.close();
 				pstmt.close();
 				conn.close();
@@ -130,9 +119,9 @@ public class MemberDao {
 		return m;
 	}
 
-	public Member selectMembercontain(String str) {
-		Member m = new Member();
-		String query = "select * from member where member_name like '%"+str+"%'";
+	public ArrayList selectMembercontain(String str) {
+		ArrayList<Member> list = new ArrayList<Member>();
+		String query = "select * from member where member_name like ?";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
@@ -144,6 +133,7 @@ public class MemberDao {
 			//conn = DriverManager.getConnection("jdbc:oracle:thin:@192.168.10.23:1521:xe","jdbc","1234");
 			//System.out.println("conn : "+conn);
 			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, "%"+str+"%");
 			rset = pstmt.executeQuery();
 			while(rset.next()) {
 				int memberNo =	rset.getInt(1);
@@ -153,9 +143,10 @@ public class MemberDao {
 				String phone = rset.getString(5);
 				int age = rset.getInt(6);
 				char gender = rset.getString(7).charAt(0);
-				Date enrollDate = rset.getDate(8);				
-				//5.값넣기
-				m = new Member(memberNo,memberId,memberPw,memberName,age,gender,phone,enrollDate);
+				Date enrollDate = rset.getDate(8);
+				Member m = new Member(memberNo,memberId,memberPw,memberName,age,gender,phone,enrollDate);
+				list.add(m);
+				
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -174,23 +165,29 @@ public class MemberDao {
 				e.printStackTrace();
 			}
 		}
-		return m;
+		return list;
 	}
 
 	public int insertMember(Member m) {
 		//insert/update/delete는 결과값이 정수형
 		int result = 0;
-		String query = "insert into member values(member_seq.nextval,'"+m.getMemberId()+"','"+m.getMemberPw()+"','"+m.getMemberName()+"','"+m.getPhone()+"',"+m.getAge()+",'"+m.getGender()+"', sysdate)";
+		String query = "insert into member values(member_seq.nextval, ?, ?, ?, ?, ?, ?, sysdate)";
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe","jdbc","1234");
 			//System.out.println("conn : "+conn);
-			stmt = conn.createStatement();
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, m.getMemberId());
+			pstmt.setString(2, m.getMemberPw());
+			pstmt.setString(3, m.getMemberName());
+			pstmt.setString(4, m.getPhone());
+			pstmt.setInt(5, m.getAge());
+			pstmt.setString(6, Character.toString(m.getGender()));
 			//수행된 행의 개수
-			result = stmt.executeUpdate(query);
+			result = pstmt.executeUpdate();
 			if(result > 0) {
 				conn.commit();
 			}else {
@@ -205,7 +202,7 @@ public class MemberDao {
 		}finally {			
 			try {
 				//6.자원반환
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -217,17 +214,18 @@ public class MemberDao {
 
 	public int deleteMember(String str) {
 		int result = 0;
-		String query = "delete from member where member_name = '"+str+"'";
+		String query = "delete from member where member_name = ?";
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe","jdbc","1234");
 			//System.out.println("conn : "+conn);
-			stmt = conn.createStatement();
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, str);
 			//수행된 행의 개수
-			result = stmt.executeUpdate(query);
+			result = pstmt.executeUpdate();
 			if(result > 0) {
 				conn.commit();
 			}else {
@@ -242,7 +240,7 @@ public class MemberDao {
 		}finally {			
 			try {
 				//6.자원반환
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -254,16 +252,22 @@ public class MemberDao {
 
 	public int updateMember(Member m) {
 		int result = 0;
-		String query = "update member set member_pw = '"+m.getMemberPw()+"', gender = '"+m.getGender()+"', phone = '"+m.getPhone()+"' where member_id = '"+m.getMemberId()+"'";
+		String query = "update member set member_pw = ?, gender = ?, phone = ? where member_id = ?";
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe","jdbc","1234");
 			//System.out.println("conn : "+conn);
-			stmt = conn.createStatement();
-			result = stmt.executeUpdate(query);
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, m.getMemberPw());			
+			pstmt.setString(2, String.valueOf(m.getGender()));
+			//같은 내용
+			//pstmt.setString(2, Character.toString(m.getGender()));
+			pstmt.setString(3, m.getPhone());
+			pstmt.setString(4, m.getMemberId());
+			result = pstmt.executeUpdate();
 			if(result > 0) {
 				conn.commit();
 			}else {
@@ -278,7 +282,7 @@ public class MemberDao {
 		}finally {			
 			try {
 				//6.자원반환
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
