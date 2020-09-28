@@ -17,7 +17,7 @@ public class MemberDao {
 		String query = "select * from member";
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
-		try {			
+		try {
 			pstmt = conn.prepareStatement(query);
 			rset = pstmt.executeQuery();
 			while(rset.next()) {
@@ -45,8 +45,8 @@ public class MemberDao {
 		Member m = null;
 		ResultSet rset = null;
 		String query = "select * from member where member_id=?";
-		PreparedStatement pstmt = null;		
-		try {			
+		PreparedStatement pstmt = null;
+		try {
 			pstmt = conn.prepareStatement(query);
 			pstmt.setString(1, str);
 			rset = pstmt.executeQuery();
@@ -145,7 +145,7 @@ public class MemberDao {
 			pstmt.setString(2, String.valueOf(m.getGender()));
 			pstmt.setString(3, m.getPhone());
 			pstmt.setString(4, m.getMemberId());
-			result = pstmt.executeUpdate();			
+			result = pstmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}finally {
