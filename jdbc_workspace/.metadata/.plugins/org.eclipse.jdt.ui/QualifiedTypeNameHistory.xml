@@ -14,4 +14,6 @@
 <fullyQualifiedTypeName name="java.sql.ResultSet"/>
 <fullyQualifiedTypeName name="java.sql.Date"/>
 <fullyQualifiedTypeName name="common.JDBCTemplate"/>
+<fullyQualifiedTypeName name="kh.shopping.common.Template"/>
+<fullyQualifiedTypeName name="kh.shopping.model.vo.Storage"/>
 </qualifiedTypeNameHistroy>
